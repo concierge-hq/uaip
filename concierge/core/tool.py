@@ -5,8 +5,13 @@ from typing import Dict, List, Callable, Tuple, Type, Any, Optional
 from dataclasses import dataclass, field
 import inspect
 
+from pydantic import create_model
+from pydantic_core import PydanticUndefined
+from pydantic.fields import FieldInfo
+from typing import Any, get_type_hints
+
 from concierge.core.state import State
-from concierge.core.construct import is_construct
+from concierge.core.construct import validate_construct
 from concierge.core.constructs import DefaultConstruct
 
 
@@ -37,17 +42,9 @@ class Tool:
             self.output = DefaultConstruct
         
         # Validate output is a construct
-        if not is_construct(self.output):
-            raise TypeError(
-                f"Tool '{self.name}' output must be a @construct. "
-                f"Apply @construct decorator to your Pydantic BaseModel."
-            )
+        validate_construct(self.output, f"Tool '{self.name}' output")
         
-        # Extract output schema (but skip validation for DefaultConstruct)
-        if self.output is not DefaultConstruct:
-            self.output_schema = self.output.model_json_schema()
-        else:
-            self.output_schema = None
+        self.output_schema = self.output.model_json_schema()
     
     async def execute(self, state: State, **kwargs) -> dict:
         """
@@ -61,26 +58,32 @@ class Tool:
         return result
 
     def to_schema(self) -> dict:
-        """Convert tool to schema for LLM prompting"""
-        # Extract parameter info from function signature
-        sig = inspect.signature(self.func)
-        params = {}
+        """Convert tool to schema for LLM prompting using Pydantic"""
         
-        for param_name, param in sig.parameters.items():
-            if param_name not in ['self', 'state', 'ctx']:
-                param_type = "any"
-                if param.annotation != inspect.Parameter.empty:
-                    param_type = param.annotation.__name__ if hasattr(param.annotation, '__name__') else str(param.annotation)
-                
-                params[param_name] = {
-                    "type": param_type,
-                    "required": param.default == inspect.Parameter.empty
-                }
+        hints = get_type_hints(self.func)
+        fields = {}
+        
+        for param_name, param in inspect.signature(self.func).parameters.items():
+            if param_name == 'self':
+                continue
+            
+            param_type = hints.get(param_name, param.annotation)
+            if hasattr(param_type, '__name__') and param_type.__name__ in ['State', 'Context']:
+                continue
+            
+            annotation = param.annotation if param.annotation != inspect.Parameter.empty else Any
+            default = param.default if param.default != inspect.Parameter.empty else PydanticUndefined
+            
+            field_info = FieldInfo.from_annotated_attribute(annotation, default)
+            fields[param_name] = (field_info.annotation, field_info)
+        
+        InputModel = create_model(f"{self.name}Input", **fields)
         
         return {
             "name": self.name,
             "description": self.description,
-            "parameters": params
+            "input_schema": InputModel.model_json_schema(),
+            "output_schema": self.output_schema
         }
 
 
@@ -108,8 +111,13 @@ class tool:
         
         # Handle direct decoration: @tool
         elif callable(func_or_output):
-            func_or_output._is_tool = True
-            func_or_output._tool_output = None
+            tool_obj = Tool(
+                name=func_or_output.__name__,
+                description=inspect.getdoc(func_or_output) or "",
+                func=func_or_output,
+                output=None
+            )
+            func_or_output._concierge_tool = tool_obj
             return func_or_output
         
         # Handle @tool() syntax (called with no args)
@@ -120,7 +128,13 @@ class tool:
     
     def __call__(self, func: Callable) -> Callable:
         # Called as @tool(output=X) or @tool()
-        func._is_tool = True
-        func._tool_output = self.output
+        # Store the Tool object itself, not just metadata
+        tool_obj = Tool(
+            name=func.__name__,
+            description=inspect.getdoc(func) or "",
+            func=func,
+            output=self.output
+        )
+        func._concierge_tool = tool_obj
         return func
 

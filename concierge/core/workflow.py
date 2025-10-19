@@ -99,16 +99,7 @@ class WorkflowSession:
         
         tool = stage.tools[tool_name]
         
-        # Check requirements
-        missing = tool.get_missing_requirements(self.state)
-        if missing:
-            return {
-                "type": "elicit_required",
-                "message": f"Tool '{tool_name}' requires: {missing}",
-                "missing": missing
-            }
-        
-        # Execute tool
+        # Execute tool (elicitation handled by LLM, not pre-checked)
         try:
             result, new_state = await tool.execute(self.state, **args)
             self.state = new_state

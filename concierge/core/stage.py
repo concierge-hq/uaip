@@ -24,14 +24,14 @@ class Stage:
     """
     name: str
     description: str
-    
+        
     # Components
     tools: Dict[str, Tool] = field(default_factory=dict)
     
     # Navigation
     transitions: List[str] = field(default_factory=list)  # Valid next stages
     prerequisites: List[Type] = field(default_factory=list)  # Constructs defining required state
-    
+
     # Hierarchy
     substages: Dict[str, 'Stage'] = field(default_factory=dict)
     parent: Optional['Stage'] = None
@@ -39,11 +39,7 @@ class Stage:
     def __post_init__(self):
         """Validate prerequisites are constructs"""
         for prereq in self.prerequisites:
-            if not is_construct(prereq):
-                raise TypeError(
-                    f"Stage '{self.name}' prerequisite {prereq.__name__} must be a @construct. "
-                    f"Apply @construct decorator to your Pydantic BaseModel."
-                )
+            validate_construct(prereq, f"Stage '{self.name}' prerequisite {prereq.__name__}")
     
     def add_tool(self, tool: Tool) -> 'Stage':
         """Add a tool to this stage"""
@@ -57,13 +53,8 @@ class Stage:
         return self
     
     def get_available_tools(self, state: State) -> List[Tool]:
-        """Get tools available given current state"""
-        available = []
-        for tool in self.tools.values():
-            missing = tool.get_missing_requirements(state)
-            if not missing:
-                available.append(tool)
-        return available
+        """Get all tools in this stage. All tools are always available."""
+        return list(self.tools.values())
     
     def can_transition_to(self, target_stage: str) -> bool:
         """Check if transition to target stage is allowed"""
@@ -138,19 +129,10 @@ class stage:
         
         stage_obj = Stage(name=stage_name, description=stage_desc, prerequisites=self.prerequisites)
         
-        # Extract @tool methods
-        for attr_name in dir(cls):
-            attr = getattr(cls, attr_name)
-            if callable(attr) and hasattr(attr, '_is_tool'):
-                # Extract output construct if declared
-                tool_output = getattr(attr, '_tool_output', None)
-                
-                stage_obj.add_tool(Tool(
-                    name=attr_name,
-                    description=inspect.getdoc(attr) or "",
-                    func=attr,
-                    output=tool_output
-                ))
+        for attr_name, attr_value in cls.__dict__.items():
+            tool_obj = getattr(attr_value, '_concierge_tool', None)
+            if tool_obj is not None:
+                stage_obj.add_tool(tool_obj)
         
         cls._stage = stage_obj
         cls.__init__ = lambda *a, **k: (_ for _ in ()).throw(
