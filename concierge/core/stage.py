@@ -129,14 +129,15 @@ class stage:
         
         stage_obj = Stage(name=stage_name, description=stage_desc, prerequisites=self.prerequisites)
         
+        instance = cls()
+        
         for attr_name, attr_value in cls.__dict__.items():
             tool_obj = getattr(attr_value, '_concierge_tool', None)
             if tool_obj is not None:
+                tool_obj.func = getattr(instance, attr_name)
                 stage_obj.add_tool(tool_obj)
         
         cls._stage = stage_obj
-        cls.__init__ = lambda *a, **k: (_ for _ in ()).throw(
-            TypeError(f"Cannot instantiate @stage class '{cls.__name__}'")
-        )
+        cls._instance = instance
         return cls
 

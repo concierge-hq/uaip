@@ -27,9 +27,8 @@ class Tool:
     name: str
     description: str
     func: Callable
-    output: Optional[Type] = None  # Optional @construct for output validation
+    output: Optional[Type] = None  
     
-    # Async support
     is_async: bool = field(default=False, init=False)
     output_schema: Optional[dict] = field(default=None, init=False)
     
@@ -37,11 +36,9 @@ class Tool:
         """Detect if function is async and extract output schema"""
         self.is_async = inspect.iscoroutinefunction(self.func)
         
-        # If no output specified, use DefaultConstruct
         if self.output is None:
             self.output = DefaultConstruct
         
-        # Validate output is a construct
         validate_construct(self.output, f"Tool '{self.name}' output")
         
         self.output_schema = self.output.model_json_schema()
@@ -50,6 +47,9 @@ class Tool:
         """
         Execute the tool with given state and arguments.
         Returns the tool output as a dict (empty dict if None).
+        
+        Note: func can be either a regular function or a bound method.
+        Bound methods already have 'self' bound, so no special handling needed.
         """
         if self.is_async:
             result = await self.func(state, **kwargs)
@@ -90,10 +90,10 @@ class Tool:
 # Decorator  
 class tool:
     """
-    Mark a method as a tool. Tool receives (ctx, state, **kwargs).
+    Mark a method as a tool. Tool receives (state, **kwargs).
     
     Usage:
-        @tool
+        @tool()
         def simple_tool(state, x: int) -> dict:
             return {"result": x}
         
@@ -102,33 +102,12 @@ class tool:
             return {"field": "value"}
     """
     
-    def __new__(cls, func_or_output=None, output: Optional[Type] = None):
-        # Handle @tool(output=X) syntax
-        if output is not None:
-            instance = super().__new__(cls)
-            instance.output = output
-            return instance
-        
-        # Handle direct decoration: @tool
-        elif callable(func_or_output):
-            tool_obj = Tool(
-                name=func_or_output.__name__,
-                description=inspect.getdoc(func_or_output) or "",
-                func=func_or_output,
-                output=None
-            )
-            func_or_output._concierge_tool = tool_obj
-            return func_or_output
-        
-        # Handle @tool() syntax (called with no args)
-        else:
-            instance = super().__new__(cls)
-            instance.output = None
-            return instance
+    def __init__(self, output: Optional[Type] = None):
+        """Initialize tool decorator with optional output construct"""
+        self.output = output
     
     def __call__(self, func: Callable) -> Callable:
-        # Called as @tool(output=X) or @tool()
-        # Store the Tool object itself, not just metadata
+        """Apply decorator to function"""
         tool_obj = Tool(
             name=func.__name__,
             description=inspect.getdoc(func) or "",

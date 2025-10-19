@@ -101,15 +101,13 @@ class WorkflowSession:
         
         # Execute tool (elicitation handled by LLM, not pre-checked)
         try:
-            result, new_state = await tool.execute(self.state, **args)
-            self.state = new_state
-            self.history.append({"action": "tool", "tool": tool_name, "args": args})
+            result = await tool.execute(self.state, **args)
+            self.history.append({"action": "tool", "tool": tool_name, "args": args, "result": result})
             
             return {
                 "type": "tool_result",
                 "tool": tool_name,
-                "result": result,
-                "state_updated": True
+                "result": result
             }
         except Exception as e:
             return {
