@@ -1,8 +1,8 @@
 """Language Engine: Parses JSON input and routes to orchestrator."""
 from concierge.core.actions import MethodCallAction, StageTransitionAction
 from concierge.core.results import Result, ToolResult, TransitionResult, ErrorResult
-from concierge.core.engine.orchestrator import Orchestrator
-from concierge.core.communications import (
+from concierge.engine.orchestrator import Orchestrator
+from concierge.communications import (
     StageMessage,
     ToolResultMessage,
     TransitionResultMessage,

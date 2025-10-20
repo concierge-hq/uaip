@@ -1,7 +1,7 @@
 """Stage message communication."""
 import json
-from concierge.core.communications.base import Communications
-from concierge.core.communications.messages import STAGE_MESSAGE
+from concierge.communications.base import Communications
+from concierge.communications.messages import STAGE_MESSAGE
 from concierge.core.stage import Stage
 from concierge.core.workflow import Workflow
 from concierge.core.state import State

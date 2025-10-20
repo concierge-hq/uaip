@@ -1,6 +1,6 @@
 """Transition result communication."""
-from concierge.core.communications.base import Communications
-from concierge.core.communications.messages import TRANSITION_RESULT_MESSAGE
+from concierge.communications.base import Communications
+from concierge.communications.messages import TRANSITION_RESULT_MESSAGE
 from concierge.core.results import TransitionResult
 from concierge.core.stage import Stage
 from concierge.core.workflow import Workflow
@@ -12,7 +12,7 @@ class TransitionResultMessage(Communications):
     
     def render(self, result: TransitionResult, stage: Stage, workflow: Workflow, state: State) -> str:
         """Render transition result with new stage context"""
-        from concierge.core.communications.stage import StageMessage
+        from concierge.communications.stage import StageMessage
         
         stage_message = StageMessage().render(stage, workflow, state)
         

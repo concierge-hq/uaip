@@ -9,10 +9,10 @@ from concierge.core import (
     Stage,
     Context,
     Workflow,
-    Orchestrator,
     stage,
     tool,
     workflow,
 )
+from concierge.engine import Orchestrator
 
 __version__ = "0.1.0"

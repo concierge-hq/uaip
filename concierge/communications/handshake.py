@@ -1,7 +1,7 @@
 """Handshake communication - initial session setup."""
 import json
-from concierge.core.communications.base import Communications
-from concierge.core.communications.messages import HANDSHAKE_MESSAGE
+from concierge.communications.base import Communications
+from concierge.communications.messages import HANDSHAKE_MESSAGE
 
 
 class HandshakeMessage(Communications):

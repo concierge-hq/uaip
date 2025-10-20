@@ -1,8 +1,8 @@
 """Integration tests for stock workflow with message exchanges."""
 import asyncio
 from concierge.core import State, tool, stage, workflow
-from concierge.core.engine import Orchestrator
-from concierge.core.engine.language_engine import LanguageEngine
+from concierge.engine import Orchestrator
+from concierge.engine.language_engine import LanguageEngine
 
 
 # Define simple stock workflow for testing

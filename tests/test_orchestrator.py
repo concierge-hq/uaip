@@ -1,7 +1,7 @@
 """Test Orchestrator - runtime execution."""
 import asyncio
 from concierge.core import State, tool, stage, workflow
-from concierge.core.engine import Orchestrator
+from concierge.engine import Orchestrator
 from concierge.core.actions import MethodCallAction, StageTransitionAction
 from concierge.core.results import ToolResult, TransitionResult, ErrorResult
 

@@ -107,7 +107,7 @@ async def main():
     workflow = StockWorkflow._workflow
     
     # Create orchestrator with session ID
-    from concierge.core.engine import Orchestrator
+    from concierge.engine import Orchestrator
     session = Orchestrator(workflow, session_id="user-123")
     
     print(f"Session ticket: {session.session_id}")

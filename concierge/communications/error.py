@@ -1,6 +1,6 @@
 """Error communication."""
-from concierge.core.communications.base import Communications
-from concierge.core.communications.messages import ERROR_MESSAGE
+from concierge.communications.base import Communications
+from concierge.communications.messages import ERROR_MESSAGE
 from concierge.core.results import ErrorResult
 
 
