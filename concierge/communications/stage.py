@@ -73,13 +73,14 @@ class StageMessage(Communications):
         
         return STAGE_MESSAGE.format(
             workflow_name=workflow.name,
+            workflow_description=workflow.description or "",
             current_stage=stage.name,
             stage_index=stage_index,
             total_stages=len(workflow.stages),
             stage_description=stage.description,
             available_tools=self._build_tools_section(stage),
-            next_stages=', '.join(stage.transitions),
-            previous_stages='', 
+            next_stages=', '.join(stage.transitions) if stage.transitions else 'None',
+            previous_stages='None', 
             state=json.dumps(state.data, indent=2),
             tool_call_format=TOOL_CALL_FORMAT,
             tool_call_example=TOOL_CALL_EXAMPLE_JSON,

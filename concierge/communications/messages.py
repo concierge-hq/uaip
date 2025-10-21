@@ -58,32 +58,37 @@ Respond with JSON:
 }}"""
 
 
-STAGE_MESSAGE = """Workflow: {workflow_name}
-Stage: {current_stage} (step {stage_index} of {total_stages})
-Description: {stage_description}
+STAGE_MESSAGE = """You are navigating the '{workflow_name}' workflow.
+Workflow purpose: {workflow_description}
 
-Available tools:
+You are currently on the '{current_stage}' stage (step {stage_index} of {total_stages}).
+Stage description: {stage_description}
+
+Available tools in this stage:
 {available_tools}
 
-Next stages: {next_stages}
-Previous stages: {previous_stages}
+Available stage transitions:
+  → Next stages: {next_stages}
+  → Previous stages: {previous_stages}
 
 Current state:
 {state}
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 What would you like to do?
 
 1. Call a tool
-Format: {tool_call_format}
-Example: {tool_call_example}
+   Format: {tool_call_format}
+   Example: {tool_call_example}
 
 2. Transition to another stage
-Format: {stage_transition_format}
-Example: {stage_transition_example}
+   Format: {stage_transition_format}
+   Example: {stage_transition_example}
 
 3. End session
-Format: {terminate_session_format}
-Example: {terminate_session_example}"""
+   Format: {terminate_session_format}
+   Example: {terminate_session_example}"""
 
 
 TRANSITION_RESULT_MESSAGE = """Successfully transitioned from '{from_stage}' to '{to_stage}'.
