@@ -2,44 +2,40 @@ import json
 import requests
 from openai import OpenAI
 
-CONCIERGE_URL = "http://localhost:8081"
+SERVICE_REGISTRY = {
+    "stock_exchange": {
+        "url": "http://localhost:8081",
+        "description": "Stock trading workflow with browse/transact/portfolio stages"
+    }
+}
 
-SYSTEM_PROMPT = """You are an AI assistant with access to a concierge service.
+SYSTEM_PROMPT = """You are an AI assistant with access to a concierge service - a gateway that lets you interact with remote web services to perform tasks.
 
-Available signals:
+Available signals (respond ONLY in JSON):
 
-1. To initiate a concierge workflow:
-   {"__signal__": "initiate_conversation", "prompt": "<N/A>"}
+1. To message the user (for info or to request input):
+   {"__signal__": "message_user", "content": "<your message>"}
 
-2. To call the concierge service:
-   {"__signal__": "call_concierge", "message": <your_concierge_payload>}
+2. To browse available services (provide 1-line objective):
+   {"__signal__": "browse_services", "objective": "<what you want to do>"}
 
-3. To request user input:
-   {"__signal__": "request_input", "prompt": "<your_message for the user>"}
+3. To call a service (after browsing):
+   {"__signal__": "call_service", "service": "<service_name>", "payload": <service_payload>}
 
-4. To end the current concierge session (user conversation continues):
-   {"__signal__": "terminate"}
+4. To end a service session:
+   {"__signal__": "terminate_service", "service": "<service_name>"}
 
-Note: The user will type "exit" when they want to end the entire conversation.
-
-You are only allowed to respond back in JSON with the above format. Any message MUST include the __signal__ key."""
+Typically you can: browse_services > call_service (follow the format provided) > terminate_service"""
 
 
 class Client:
     def __init__(self, api_base: str, api_key: str):
         self.llm = OpenAI(base_url=api_base, api_key=api_key)
         self.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-        self.session_id = None
+        self.sessions = {}  # service_name -> session_id
     
-    def handshake(self) -> str:
-        request_payload = {"action": "handshake"}
-        print(f"\n[CLIENT → SERVER] {json.dumps(request_payload)}")
-        
-        response = requests.post(CONCIERGE_URL, json=request_payload)
-        self.session_id = response.headers.get('X-Session-Id')
-        
-        print(f"[SERVER → CLIENT] {response.text}")
-        return response.text
+    def get_service_url(self, service_name: str) -> str:
+        return SERVICE_REGISTRY[service_name]["url"]
 
     def chat(self, user_input: str) -> str:
         self.messages.append({"role": "user", "content": user_input})
@@ -58,57 +54,68 @@ class Client:
         
         return reply
 
-    def call_concierge(self, llm_message: str) -> str:
+    def call_service(self, service_name: str, payload: dict) -> str:
         try:
-            envelope = json.loads(llm_message)
-            payload = envelope.get("message", {})
-            
+            url = self.get_service_url(service_name)
             headers = {}
-            if self.session_id:
-                headers["X-Session-Id"] = self.session_id
+            if service_name in self.sessions:
+                headers["X-Session-Id"] = self.sessions[service_name]
             
-            print(f"\n[CLIENT → SERVER] {json.dumps(payload)}")
+            print(f"\n[CLIENT → {service_name.upper()}] {json.dumps(payload)}")
             if headers:
                 print(f"[HEADERS] {json.dumps(headers)}")
             
-            response = requests.post(CONCIERGE_URL, json=payload, headers=headers)
+            response = requests.post(url, json=payload, headers=headers)
             
             if 'X-Session-Id' in response.headers:
-                self.session_id = response.headers['X-Session-Id']
+                self.sessions[service_name] = response.headers['X-Session-Id']
             
-            print(f"[SERVER → CLIENT] {response.text}")
-            
+            print(f"[{service_name.upper()} → CLIENT] {response.text[:200]}...")
             return response.text
         except Exception as e:
-            return f"Error calling concierge: {e}"
+            return f"Error calling {service_name}: {e}"
 
     def process_response(self, reply: str) -> tuple[bool, str]:
         try:
             data = json.loads(reply)
-            signal = data.get("__signal__")
+            signal = data["__signal__"]
             
-            if signal == "call_concierge":
-                result = self.call_concierge(reply)
-                llm_response = self.chat(f"Concierge response: {result}")
-                return self.process_response(llm_response)
-            
-            elif signal == "request_input":
-                prompt = data.get("prompt", "Please provide input:")
-                return False, prompt
+            if signal == "browse_services":
+                objective = data["objective"]
+                services = [{"name": k, "description": v["description"]} for k, v in SERVICE_REGISTRY.items()]
+                result = f"""Available services for '{objective}':
+{json.dumps(services, indent=2)}
 
-            elif signal == "initiate_conversation":
-                result = self.handshake()
-                llm_response = self.chat(f"Concierge response: {result}")
+To start using a service, reply with:
+{{"__signal__": "call_service", "service": "<service_name>", "payload": "initiate"}}"""
+                llm_response = self.chat(result)
                 return self.process_response(llm_response)
+            
+            elif signal == "call_service":
+                service = data["service"]
+                payload = data["payload"]
+                if payload == "initiate":
+                    payload = {"action": "handshake"}
+                result = self.call_service(service, payload)
+                llm_response = self.chat(f"Service response: {result}")
+                return self.process_response(llm_response)
+            
+            elif signal == "message_user":
+                content = data["content"]
+                return False, content
                 
-            elif signal == "respond":
-                self.session_id = None
-                message = data.get("message", "Task completed.")
-                return False, message
+            elif signal == "terminate_service":
+                service = data["service"]
+                if service in self.sessions:
+                    del self.sessions[service]
+                confirmation = f"Service '{service}' session terminated successfully."
+                llm_response = self.chat(confirmation)
+                return self.process_response(llm_response)
+            
             else:
                 return False, f"Unknown signal: {signal}"
-        except json.JSONDecodeError:
-            return False, f"Invalid JSON: {reply}"
+        except (json.JSONDecodeError, KeyError) as e:
+            return False, f"Invalid response: {e}"
 
     def run(self):
         while True:
