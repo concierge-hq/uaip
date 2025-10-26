@@ -1,6 +1,8 @@
 """Brief Presentation - minimal response with just result and current state."""
 import json
+import asyncio
 from concierge.presentations.base import Presentation
+from concierge.core.state_manager import get_state_manager
 
 
 class BriefPresentation(Presentation):
@@ -17,19 +19,20 @@ class BriefPresentation(Presentation):
             self.content,
             "",
             f"Current stage: {current_stage.name}",
-            f"State: {self._format_current_state(current_stage)}",
+            f"State: {self._format_current_state(orchestrator)}",
             f"Available tasks: {self._format_available_tasks(current_stage)}",
             f"Available transitions: {self._format_available_transitions(current_stage)}",
         ]
         
         return "\n".join(lines)
     
-    def _format_current_state(self, stage) -> str:
-        """Format current state variables"""
-        state_data = dict(stage.local_state.data)
-        if state_data:
-            return json.dumps(state_data)
-        return "{}"
+    def _format_current_state(self, orchestrator) -> str:
+        """
+        Format current state variables.
+        State is cached in orchestrator after each operation.
+        """
+        stage_state = getattr(orchestrator, 'current_stage_state', {})
+        return json.dumps(stage_state)
     
     def _format_available_tasks(self, stage) -> str:
         """List available task names"""

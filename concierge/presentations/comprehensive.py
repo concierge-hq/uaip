@@ -1,5 +1,6 @@
 """Comprehensive Presentation - full context with stage, tasks, state, etc."""
 import json
+import asyncio
 from concierge.presentations.base import Presentation
 from concierge.external.contracts import (
     TaskCall, 
@@ -7,6 +8,7 @@ from concierge.external.contracts import (
     ACTION_METHOD_CALL,
     ACTION_STAGE_TRANSITION
 )
+from concierge.core.state_manager import get_state_manager
 
 
 class ComprehensivePresentation(Presentation):
@@ -37,7 +39,7 @@ class ComprehensivePresentation(Presentation):
             f"CURRENT POSITION: {current_stage.name}",
             "",
             "CURRENT STATE:",
-            self._format_current_state(current_stage),
+            self._format_current_state(orchestrator),
             "",
             "YOU MAY CHOOSE THE FOLLOWING ACTIONS:",
             "",
@@ -60,12 +62,13 @@ class ComprehensivePresentation(Presentation):
             stages_list.append(f"  - {stage_name}")
         return "\n".join(stages_list) if stages_list else "  (no stages)"
     
-    def _format_current_state(self, stage) -> str:
-        """Format current state variables"""
-        state_data = dict(stage.local_state.data)
-        if state_data:
-            return json.dumps(state_data, indent=2)
-        return "{}"
+    def _format_current_state(self, orchestrator) -> str:
+        """
+        Format current state variables.
+        State is cached in orchestrator after each operation.
+        """
+        stage_state = getattr(orchestrator, 'current_stage_state', {})
+        return json.dumps(stage_state, indent=2)
     
     def _format_tasks(self, stage) -> str:
         """Format available tasks with descriptions and call format"""

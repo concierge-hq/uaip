@@ -26,7 +26,7 @@ class StateManager(ABC):
     """Base class defining state management contract."""
     
     @abstractmethod
-    async def create_session(
+    def create_session(
         self,
         session_id: str,
         workflow_name: str,
@@ -104,14 +104,15 @@ class InMemoryStateManager(StateManager):
         self._sessions: Dict[str, Dict[str, Any]] = {}
         self._history: Dict[str, List[Dict[str, Any]]] = {}
     
-    async def create_session(
+    def create_session(
         self,
         session_id: str,
         workflow_name: str,
         initial_stage: str
     ) -> None:
+        """Create new workflow session (idempotent - won't error if exists)."""
         if session_id in self._sessions:
-            raise ValueError(f"Session {session_id} already exists")
+            return  # Session already exists, silently return
         
         self._sessions[session_id] = {
             "workflow_name": workflow_name,

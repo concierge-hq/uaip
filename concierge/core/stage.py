@@ -1,5 +1,6 @@
 """
-Stage: Represents a logical grouping of tasks and state.
+Stage: Represents a logical grouping of tasks.
+State is managed externally via state_manager.
 """
 from typing import Dict, List, Optional, Callable, Type, Any, TYPE_CHECKING
 from dataclasses import dataclass, field
@@ -10,21 +11,13 @@ from concierge.core.construct import is_construct, validate_construct
 from concierge.core.task import Task, task
 
 
-from concierge.core.workflow import Workflow
-
-@dataclass
-class Context:
-    """Context holds global state and metadata."""
-    global_state: State = field(default_factory=State)
-
-
 @dataclass
 class Stage:
     """
-    A stage represents a logical grouping of tasks and state.
+    A stage represents a logical grouping of tasks.
     Analogous to a page in a web application.
     
-    Each stage has its own local state that is shared by all tasks within the stage.
+    State is managed externally via state_manager, not stored here.
     """
     name: str
     description: str
@@ -32,19 +25,16 @@ class Stage:
     # Components
     tasks: Dict[str, Task] = field(default_factory=dict)
     
-    # Stage-local state (shared by all tasks in this stage)
-    local_state: State = field(default_factory=State)
-    
     # Navigation
-    transitions: List[str] = field(default_factory=list)  # Valid next stages
-    prerequisites: List[Type] = field(default_factory=list)  # Constructs defining required state
+    transitions: List[str] = field(default_factory=list)
+    prerequisites: List[Type] = field(default_factory=list)
 
     # Hierarchy
     substages: Dict[str, 'Stage'] = field(default_factory=dict)
     parent: Optional['Stage'] = None
     
     def __post_init__(self):
-        """Validate prerequisites are constructs and initialize local state"""
+        """Validate prerequisites are constructs"""
         for prereq in self.prerequisites:
             validate_construct(prereq, f"Stage '{self.name}' prerequisite {prereq.__name__}")
     
@@ -138,7 +128,14 @@ class stage:
     def __call__(self, cls: Type) -> Type:
         stage_name = self.name or cls.__name__.lower()
         stage_desc = inspect.getdoc(cls) or ""
-                
+        
+        if isinstance(cls, Stage):
+            raise TypeError(
+                f"Invalid stage definition: Cannot use @stage decorator on a Stage object that has already been decorated.\n"
+                f"The @stage decorator should only be applied once to a class.\n"
+                f"Original stage name: '{cls.name}'\n"
+            )
+        
         from concierge.core.workflow import Workflow
         if isinstance(cls, Workflow):
             raise TypeError(

@@ -69,10 +69,10 @@ def test_orchestrator_invalid_transition():
 
 def test_orchestrator_session_info():
     wf = TestFlow._workflow
-    orch = Orchestrator(wf, session_id="test")
+    orch = Orchestrator(wf, session_id="test-orch-info")
     
-    info = orch.get_session_info()
-    assert info["session_id"] == "test"
+    info = asyncio.run(orch.get_session_info())
+    assert info["session_id"] == "test-orch-info"
     assert info["workflow"] == "test_flow"
     assert info["current_stage"] == "start"
 

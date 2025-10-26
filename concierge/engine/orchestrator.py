@@ -11,26 +11,33 @@ from concierge.core.actions import Action, MethodCallAction, StageTransitionActi
 from concierge.core.results import Result, TaskResult, TransitionResult, ErrorResult, StateInputRequiredResult
 from concierge.presentations import ComprehensivePresentation, BriefPresentation
 from concierge.external.contracts import ACTION_METHOD_CALL, ACTION_STAGE_TRANSITION
+from concierge.core.state_manager import get_state_manager
 
 
 @dataclass
 class Orchestrator:
     """
     Orchestrator handles the core business logic of workflow execution.
-    Maintains state and handles interactions.
+    State is managed via state_manager, not stored here.
     """
     workflow: Workflow
     session_id: str
-    state: State = field(default_factory=State)
     history: list = field(default_factory=list)
     pending_transition: Optional[str] = None
     
     def __post_init__(self):
         """Initialize session with workflow's initial stage"""
         self.workflow.initialize()
-        self.state = State()
         self.history = []
         self.pending_transition = None
+        
+        # Create session in state_manager
+        state_mgr = get_state_manager()
+        state_mgr.create_session(
+            session_id=self.session_id,
+            workflow_name=self.workflow.name,
+            initial_stage=self.workflow.get_cursor().name
+        )
     
     def get_current_stage(self) -> Stage:
         """Get current stage object"""
@@ -40,7 +47,7 @@ class Orchestrator:
         """Execute a method call action"""
         stage = self.get_current_stage()
         
-        result = await self.workflow.call_task(stage.name, action.task_name, action.args)
+        result = await self.workflow.call_task(stage.name, action.task_name, action.args, self.session_id)
         
         if result["type"] == "task_result":
             self.history.append({
@@ -49,6 +56,11 @@ class Orchestrator:
                 "args": action.args,
                 "result": result["result"]
             })
+            
+            # Fetch updated stage state for presentation
+            state_mgr = get_state_manager()
+            self.current_stage_state = await state_mgr.get_stage_state(self.session_id, stage.name)
+            
             return TaskResult(
                 task_name=action.task_name,
                 result=result["result"],
@@ -64,10 +76,19 @@ class Orchestrator:
         """Execute a stage transition action"""
         stage = self.get_current_stage()
         
+        # Get current states for validation
+        state_mgr = get_state_manager()
+        global_state_dict = await state_mgr.get_global_state(self.session_id)
+        source_state_dict = await state_mgr.get_stage_state(self.session_id, stage.name)
+        
+        global_state = State(global_state_dict)
+        source_state = State(source_state_dict)
+        
         validation = self.workflow.validate_transition(
             stage.name,
             action.target_stage,
-            self.state
+            global_state,
+            source_state
         )
         
         if not validation["valid"]:
@@ -89,6 +110,10 @@ class Orchestrator:
         target = self.workflow.transition_to(action.target_stage)
         self.pending_transition = None
         
+        # Update current stage in state_manager
+        state_mgr = get_state_manager()
+        await state_mgr.update_current_stage(self.session_id, action.target_stage)
+        
         self.history.append({
             "action": ACTION_STAGE_TRANSITION,
             "from": stage.name,
@@ -101,18 +126,25 @@ class Orchestrator:
             presentation_type=ComprehensivePresentation
         )
     
-    def populate_state(self, state_data: dict) -> None:
+    async def populate_state(self, state_data: dict) -> None:
         """
-        Store provided state in current stage's local_state.
+        Store provided state in current stage's state via state_manager.
         User will manually request transition again after this.
         """
         current_stage = self.get_current_stage()
-        for key, value in state_data.items():
-            current_stage.local_state.set(key, value)
+        state_mgr = get_state_manager()
+        await state_mgr.update_stage_state(
+            self.session_id,
+            current_stage.name,
+            state_data
+        )
     
-    def get_session_info(self) -> dict:
+    async def get_session_info(self) -> dict:
         """Get current session information"""
         stage = self.get_current_stage()
+        state_mgr = get_state_manager()
+        global_state = await state_mgr.get_global_state(self.session_id)
+        
         return {
             "session_id": self.session_id,
             "workflow": self.workflow.name,
@@ -121,7 +153,7 @@ class Orchestrator:
             "can_transition_to": stage.transitions,
             "state_summary": {
                 construct: len(data) if isinstance(data, (list, dict, str)) else 1 
-                for construct, data in self.state.data.items()
+                for construct, data in global_state.items()
             },
             "history_length": len(self.history)
         }

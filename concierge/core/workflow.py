@@ -8,6 +8,7 @@ import inspect
 from concierge.core.stage import Stage
 from concierge.core.state import State
 from concierge.core.task import Task
+from concierge.core.state_manager import get_state_manager
 
 
 class StateTransfer(Enum):
@@ -49,10 +50,7 @@ class Workflow:
                     self._incoming_edges[target].append(stage_name)
     
     def initialize(self):
-        """Initialize cursor to initial stage and reset stage local states"""
-        for stage in self.stages.values():
-            stage.local_state = State()
-        
+        """Initialize cursor to initial stage"""
         self._build_incoming_edges()
         roots = [name for name, incoming in self._incoming_edges.items() if not incoming]
         stage_name = roots[0] if roots else list(self.stages.keys())[0]
@@ -71,13 +69,12 @@ class Workflow:
         return self._incoming_edges.get(self.cursor.name, [])
     
     def get_stage_metadata(self, stage_name: str) -> dict:
-        """Get metadata for a stage: tasks and state"""
+        """Get metadata for a stage: tasks and transitions"""
         stage = self.get_stage(stage_name)
         return {
             "name": stage.name,
             "description": stage.description,
             "tasks": [{"name": t.name, "description": t.description} for t in stage.tasks.values()],
-            "state": stage.local_state.data,
             "transitions": stage.transitions,
             "prerequisites": [p.__name__ for p in stage.prerequisites]
         }
@@ -88,7 +85,7 @@ class Workflow:
             raise ValueError(f"Stage '{stage_name}' not found in workflow '{self.name}'")
         return self.stages[stage_name]
     
-    async def call_task(self, stage_name: str, task_name: str, args: dict) -> dict:
+    async def call_task(self, stage_name: str, task_name: str, args: dict, session_id: str) -> dict:
         """Execute a task in a specific stage"""
         stage = self.get_stage(stage_name)
         
@@ -100,8 +97,16 @@ class Workflow:
             }
         
         task = stage.tasks[task_name]
+        state_mgr = get_state_manager()
+        
         try:
-            result = await task.execute(stage.local_state, **args)
+            stage_state_dict = await state_mgr.get_stage_state(session_id, stage_name)
+            stage_state = State(stage_state_dict)
+            
+            result = await task.execute(stage_state, **args)
+            
+            await state_mgr.update_stage_state(session_id, stage_name, stage_state.data)
+            
             return {
                 "type": "task_result",
                 "task": task_name,
@@ -119,7 +124,7 @@ class Workflow:
         stage = self.get_stage(from_stage)
         return stage.can_transition_to(to_stage)
     
-    def validate_transition(self, from_stage: str, to_stage: str, global_state: State) -> dict:
+    def validate_transition(self, from_stage: str, to_stage: str, global_state: State, source_state: State) -> dict:
         """Validate transition and check prerequisites"""
         if not self.can_transition(from_stage, to_stage):
             return {
@@ -128,14 +133,12 @@ class Workflow:
                 "allowed": self.get_stage(from_stage).transitions
             }
         
-        source = self.get_stage(from_stage)
         target = self.get_stage(to_stage)
-        
         propagation_config = self.get_propagation_config(from_stage, to_stage)
         
         missing = target.get_missing_prerequisites(
             global_state, 
-            source.local_state, 
+            source_state, 
             propagation_config
         )
         
@@ -153,23 +156,6 @@ class Workflow:
         """Transition cursor to new stage and return target stage"""
         from_stage = self.cursor
         target = self.get_stage(to_stage)
-        
-        if from_stage:
-            config = self.get_propagation_config(from_stage.name, to_stage)
-            new_state = State()
-            
-            if config == "all":
-                for key, value in from_stage.local_state._data.items():
-                    new_state.set(key, value)
-            elif config != "none" and isinstance(config, list):
-                for key in config:
-                    if from_stage.local_state.has(key):
-                        new_state.set(key, from_stage.local_state.get(key))
-            
-            target.local_state = new_state
-        else:
-            target.local_state = State()
-        
         self.cursor = target
         return target
     

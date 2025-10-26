@@ -26,11 +26,15 @@ def test_stage_task_discovery():
 
 
 def test_stage_local_state():
-    # Execute task2 which mutates local state
-    asyncio.run(TestStage.tasks["task2"].execute(TestStage.local_state, y="test"))
+    """Test that tasks can modify state"""
+    from concierge.core.state import State
     
-    # Verify stage local state was updated
-    assert TestStage.local_state.get("key") == "test"
+    state = State()
+    
+    asyncio.run(TestStage.tasks["task2"].execute(state, y="test"))
+    
+    # Verify state was updated
+    assert state.get("key") == "test"
 
 
 def test_stage_instance_binding():

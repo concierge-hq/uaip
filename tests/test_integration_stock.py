@@ -114,10 +114,16 @@ YOU MAY CHOOSE THE FOLLOWING ACTIONS:
     {"action": "stage_transition", "stage": "portfolio"}
 
 
+You must ONLY respond with a single JSON. Do not add comments or extra text.
 ================================================================================"""
         
         assert response == expected
-        assert orch.get_current_stage().local_state.get("last_search") == "AAPL"
+        
+        # Verify state was updated via state_manager
+        from concierge.core.state_manager import get_state_manager
+        state_mgr = get_state_manager()
+        stage_state = await state_mgr.get_stage_state("test-1", "browse")
+        assert stage_state.get("last_search") == "AAPL"
     
     asyncio.run(run())
 
@@ -194,11 +200,16 @@ YOU MAY CHOOSE THE FOLLOWING ACTIONS:
     {"action": "stage_transition", "stage": "portfolio"}
 
 
+You must ONLY respond with a single JSON. Do not add comments or extra text.
 ================================================================================"""
         
         assert response == expected
         
-        cart = orch.get_current_stage().local_state.get("cart")
+        # Verify state via state_manager
+        from concierge.core.state_manager import get_state_manager
+        state_mgr = get_state_manager()
+        stage_state = await state_mgr.get_stage_state("test-2", "browse")
+        cart = stage_state.get("cart")
         assert cart["symbol"] == "GOOGL"
         assert cart["quantity"] == 5
     
@@ -256,6 +267,7 @@ YOU MAY CHOOSE THE FOLLOWING ACTIONS:
     {"action": "stage_transition", "stage": "browse"}
 
 
+You must ONLY respond with a single JSON. Do not add comments or extra text.
 ================================================================================"""
         
         assert response == expected
@@ -287,7 +299,12 @@ def test_stock_workflow_full_conversation():
         })
         assert "Task 'add_to_cart' executed successfully." in response2
         assert "Added 10 shares of AAPL" in response2
-        assert orch.get_current_stage().local_state.get("cart") is not None
+        
+        # Verify state via state_manager
+        from concierge.core.state_manager import get_state_manager
+        state_mgr = get_state_manager()
+        stage_state = await state_mgr.get_stage_state("test-4", "browse")
+        assert stage_state.get("cart") is not None
         
         response3 = await engine.process({
             "action": "stage_transition",
@@ -375,6 +392,7 @@ YOU MAY CHOOSE THE FOLLOWING ACTIONS:
     {"action": "stage_transition", "stage": "portfolio"}
 
 
+You must ONLY respond with a single JSON. Do not add comments or extra text.
 ================================================================================"""
         
         assert response == expected
@@ -445,6 +463,7 @@ YOU MAY CHOOSE THE FOLLOWING ACTIONS:
     {"action": "stage_transition", "stage": "portfolio"}
 
 
+You must ONLY respond with a single JSON. Do not add comments or extra text.
 ================================================================================"""
         
         assert response == expected

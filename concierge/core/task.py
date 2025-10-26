@@ -133,6 +133,21 @@ class task:
                 f"          ...\n"
             )
         
+        sig = inspect.signature(func)
+        params = list(sig.parameters.keys())
+        if not params or params[0] != 'self':
+            raise TypeError(
+                f"Invalid task definition: @task decorator can only be applied to instance methods.\n"
+                f"The first parameter must be 'self'.\n"
+                f"Found parameters: {params}\n"
+                f"Example:\n"
+                f"  @stage()\n"
+                f"  class MyStage:\n"
+                f"      @task()\n"
+                f"      def {func.__name__}(self, state, ...):\n"
+                f"          ...\n"
+            )
+        
         task_obj = Task(
             name=func.__name__,
             description=inspect.getdoc(func) or "",

@@ -88,7 +88,7 @@ class LanguageEngine:
             
             elif action_type == ACTION_STATE_INPUT:
                 state_data = llm_json.get("data", {})
-                self.orchestrator.populate_state(state_data)
+                await self.orchestrator.populate_state(state_data)
                 result = StateUpdateResult(
                     message="State populated successfully.",
                     presentation_type=ComprehensivePresentation
