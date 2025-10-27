@@ -260,4 +260,8 @@ class workflow:
                 workflow_obj.state_propagation[(from_stage.name, to_stage.name)] = cfg
         
         cls._workflow = workflow_obj
+        
+        from concierge.core.registry import get_registry
+        get_registry().register(workflow_obj)
+        
         return cls

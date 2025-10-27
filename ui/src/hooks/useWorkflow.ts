@@ -1,15 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
 import type { Workflow, WorkflowGraph } from '../types/workflow'
-import { mockWorkflow, mockWorkflowGraph } from '../data/mockWorkflow'
 
-async function fetchWorkflow(_name: string): Promise<Workflow> {
-  await new Promise(resolve => setTimeout(resolve, 300))
-  return mockWorkflow
+const API_BASE = 'http://localhost:8082'
+
+async function fetchWorkflow(name: string): Promise<Workflow> {
+  const response = await fetch(`${API_BASE}/api/workflows/${name}`)
+  if (!response.ok) throw new Error('Failed to fetch workflow')
+  return response.json()
 }
 
-async function fetchWorkflowGraph(_name: string): Promise<WorkflowGraph> {
-  await new Promise(resolve => setTimeout(resolve, 300))
-  return mockWorkflowGraph
+async function fetchWorkflowGraph(name: string): Promise<WorkflowGraph> {
+  const response = await fetch(`${API_BASE}/api/workflows/${name}`)
+  if (!response.ok) throw new Error('Failed to fetch workflow graph')
+  const data = await response.json()
+  return data.graph
 }
 
 export function useWorkflow(name: string) {

@@ -1,0 +1,222 @@
+"""Concierge REST API"""
+from typing import Optional, Dict, Any, List
+from dataclasses import dataclass
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
+from concierge.core.registry import get_registry
+from concierge.core.workflow import Workflow
+from concierge.serving.manager import SessionManager
+
+
+@dataclass
+class APIContext:
+    """API runtime context"""
+    session_managers: Dict[str, SessionManager]
+    tracker: Optional[Any] = None
+
+
+_context: Optional[APIContext] = None
+
+
+def initialize_api(session_managers: Dict[str, SessionManager], tracker: Optional[Any] = None):
+    """Initialize API with runtime dependencies"""
+    global _context
+    _context = APIContext(session_managers=session_managers, tracker=tracker)
+
+
+def get_context() -> APIContext:
+    """Get API context"""
+    if _context is None:
+        raise RuntimeError("API not initialized")
+    return _context
+
+
+app = FastAPI(title="Concierge API", version="1.0.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
+
+@app.get("/api/workflows")
+async def list_workflows() -> Dict[str, Any]:
+    """List all registered workflows"""
+    registry = get_registry()
+    workflows = []
+    
+    for metadata in registry.list_workflows():
+        workflow = registry.get_workflow(metadata.name)
+        workflows.append({
+            "name": metadata.name,
+            "description": metadata.description,
+            "stages": metadata.stages,
+            "initial_stage": workflow.initial_stage
+        })
+    
+    return {"workflows": workflows}
+
+
+@app.get("/api/workflows/{workflow_name}")
+async def get_workflow_details(workflow_name: str) -> Dict[str, Any]:
+    """Get complete workflow definition and graph structure"""
+    registry = get_registry()
+    
+    if not registry.has_workflow(workflow_name):
+        raise HTTPException(status_code=404, detail=f"Workflow not found: {workflow_name}")
+    
+    workflow = registry.get_workflow(workflow_name)
+    
+    # Build stages detail
+    stages = {}
+    for stage_name, stage in workflow.stages.items():
+        tasks = {
+            task_name: {
+                "name": task.name,
+                "description": task.description
+            }
+            for task_name, task in stage.tasks.items()
+        }
+        stages[stage_name] = {
+            "name": stage.name,
+            "description": stage.description,
+            "tasks": tasks,
+            "transitions": stage.transitions
+        }
+    
+    nodes = []
+    edges = []
+    stage_list = list(workflow.stages.values())
+    for index, stage in enumerate(stage_list):
+        nodes.append({
+            "id": stage.name,
+            "data": {
+                "label": stage.name,
+                "description": stage.description,
+                "tasks": list(stage.tasks.keys()),
+                "isInitial": stage.name == workflow.initial_stage
+            },
+            "position": {
+                "x": (index % 3) * 250,
+                "y": (index // 3) * 200
+            }
+        })
+        for target_stage in stage.transitions:
+            edges.append({
+                "id": f"{stage.name}->{target_stage}",
+                "source": stage.name,
+                "target": target_stage
+            })
+    
+    return {
+        "name": workflow.name,
+        "description": workflow.description,
+        "stages": stages,
+        "graph": {"nodes": nodes, "edges": edges}
+    }
+
+
+@app.get("/api/sessions/{session_id}/history")
+async def get_session_history(session_id: str) -> Dict[str, Any]:
+    """Get execution history for a session"""
+    context = get_context()
+    
+    if context.tracker is None:
+        raise HTTPException(
+            status_code=503,
+            detail="History tracking requires database configuration"
+        )
+    
+    try:
+        history = await context.tracker.get_session_history(session_id)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Session not found: {session_id}")
+    
+    steps = [
+        {
+            "sequence": step.sequence_number,
+            "timestamp": step.timestamp.isoformat(),
+            "action_type": step.action_type,
+            "stage_name": step.stage_name,
+            "task_name": step.task_name,
+            "state_after": step.state_after,
+            "duration_ms": step.duration_ms
+        }
+        for step in history
+    ]
+    
+    return {
+        "session_id": session_id,
+        "step_count": len(steps),
+        "steps": steps
+    }
+
+
+@app.get("/api/statistics")
+async def get_statistics() -> Dict[str, Any]:
+    """Get global statistics across all workflows"""
+    context = get_context()
+    registry = get_registry()
+    
+    active_session_count = sum(
+        len(manager.get_active_sessions())
+        for manager in context.session_managers.values()
+    )
+    
+    workflow_list = list(registry.list_workflows())
+    workflow_stats = []
+    
+    for metadata in workflow_list:
+        stats = {"name": metadata.name}
+        
+        if context.tracker is not None:
+            try:
+                db_stats = await context.tracker.get_workflow_stats(metadata.name)
+                stats.update(db_stats)
+            except Exception:
+                pass
+        
+        workflow_stats.append(stats)
+    
+    return {
+        "total_workflows": len(workflow_list),
+        "active_sessions": active_session_count,
+        "workflows": workflow_stats
+    }
+
+
+@app.post("/execute")
+async def execute_workflow(request: Dict[str, Any]) -> str:
+    """Execute workflow action (for LLM clients)"""
+    context = get_context()
+    
+    workflow_name = request.get("workflow_name")
+    session_id = request.get("session_id")
+    
+    if not workflow_name:
+        managers = context.session_managers
+        if len(managers) == 1:
+            workflow_name = list(managers.keys())[0]
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="workflow_name required when multiple workflows available"
+            )
+    
+    session_manager = context.session_managers.get(workflow_name)
+    if not session_manager:
+        raise HTTPException(status_code=404, detail=f"Workflow not found: {workflow_name}")
+    
+    if not session_id:
+        session_id = session_manager.create_session()
+    
+    response = await session_manager.handle_request(session_id, request)
+    return response
+
+
+@app.get("/health")
+async def health_check() -> Dict[str, str]:
+    """Health check endpoint"""
+    return {"status": "healthy"}
