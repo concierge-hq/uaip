@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-
-const API_BASE = 'http://localhost:8082'
+import { API_BASE_URL } from '../config'
 
 interface WorkflowSummary {
   name: string
@@ -14,7 +13,7 @@ interface WorkflowsResponse {
 }
 
 async function fetchWorkflows(): Promise<WorkflowSummary[]> {
-  const response = await fetch(`${API_BASE}/api/workflows`)
+  const response = await fetch(`${API_BASE_URL}/api/workflows`)
   if (!response.ok) throw new Error('Failed to fetch workflows')
   const data: WorkflowsResponse = await response.json()
   return data.workflows

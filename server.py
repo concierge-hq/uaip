@@ -1,6 +1,7 @@
 from concierge.serving.api import app, initialize_api
 from concierge.serving.manager import SessionManager
 from concierge.core.registry import get_registry
+from concierge.config import SERVER_HOST, SERVER_PORT
 
 # Import workflows (auto-registers)
 import examples.simple_stock
@@ -17,11 +18,11 @@ if __name__ == "__main__":
     
     initialize_api(session_managers, tracker=None)
     
-    print(f"   Listening: http://localhost:8082")
+    print(f"   Listening: http://{SERVER_HOST}:{SERVER_PORT}")
     print(f"   UI APIs: /api/workflows, /api/statistics")
     print(f"   LLM API: POST /execute")
     print()
     
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8082)
+    uvicorn.run(app, host=SERVER_HOST, port=SERVER_PORT)
 
