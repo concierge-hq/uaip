@@ -14,3 +14,5 @@ DB_NAME = _config["database"]["name"]
 DB_USER = _config["database"]["user"]
 DB_PASSWORD = _config["database"]["password"]
 
+SERVICES = _config["services"]
+

@@ -9,3 +9,8 @@ database:
   user: "postgres"
   password: ""
 
+services:
+  stock_exchange:
+    url: "http://localhost:8082/execute"
+    description: "Stock trading workflow with browse/transact/portfolio stages"
+

@@ -261,6 +261,7 @@ class workflow:
         
         cls._workflow = workflow_obj
         
+        # Lazy import to avoid circular dependency
         from concierge.core.registry import get_registry
         get_registry().register(workflow_obj)
         

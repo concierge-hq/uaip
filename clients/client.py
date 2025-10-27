@@ -1,13 +1,13 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import json
 import requests
 from openai import OpenAI
+from concierge.config import SERVICES
 
-SERVICE_REGISTRY = {
-    "stock_exchange": {
-        "url": "http://localhost:8081",
-        "description": "Stock trading workflow with browse/transact/portfolio stages"
-    }
-}
+SERVICE_REGISTRY = SERVICES
 
 SYSTEM_PROMPT = """You are an AI assistant with access to a concierge service - a gateway that lets you interact with remote web services to perform tasks.
 
@@ -78,6 +78,8 @@ class Client:
             headers = {}
             if service_name in self.sessions:
                 headers["X-Session-Id"] = self.sessions[service_name]
+            
+            payload["workflow_name"] = service_name
             
             print(f"\n[CLIENT → {service_name.upper()}] {json.dumps(payload)}")
             if headers:

@@ -1,7 +1,7 @@
 """Concierge REST API"""
 from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from concierge.core.registry import get_registry
@@ -41,6 +41,34 @@ app.add_middleware(
 )
 
 
+@app.get("/api/stats")
+async def get_stats() -> Dict[str, Any]:
+    """Get platform statistics"""
+    registry = get_registry()
+    context = get_context()
+    
+    # Count workflows
+    workflow_count = len(list(registry.list_workflows()))
+    
+    # TODO: Get real execution stats from tracker
+    # For now, return mock data that can be replaced with real metrics
+    return {
+        "workflows": {
+            "total": workflow_count,
+            "active": workflow_count
+        },
+        "executions": {
+            "total": 0,  # TODO: Query from tracker
+            "success": 0,
+            "failed": 0
+        },
+        "performance": {
+            "avg_duration_ms": 0,  # TODO: Calculate from tracker
+            "success_rate": 0.0
+        }
+    }
+
+
 @app.get("/api/workflows")
 async def list_workflows() -> Dict[str, Any]:
     """List all registered workflows"""
@@ -69,7 +97,6 @@ async def get_workflow_details(workflow_name: str) -> Dict[str, Any]:
     
     workflow = registry.get_workflow(workflow_name)
     
-    # Build stages detail
     stages = {}
     for stage_name, stage in workflow.stages.items():
         tasks = {
@@ -188,12 +215,12 @@ async def get_statistics() -> Dict[str, Any]:
 
 
 @app.post("/execute")
-async def execute_workflow(request: Dict[str, Any]) -> str:
+async def execute_workflow(http_request: Request, response: Response) -> str:
     """Execute workflow action (for LLM clients)"""
     context = get_context()
     
-    workflow_name = request.get("workflow_name")
-    session_id = request.get("session_id")
+    body = await http_request.json()
+    workflow_name = body.get("workflow_name")
     
     if not workflow_name:
         managers = context.session_managers
@@ -209,11 +236,14 @@ async def execute_workflow(request: Dict[str, Any]) -> str:
     if not session_manager:
         raise HTTPException(status_code=404, detail=f"Workflow not found: {workflow_name}")
     
+    session_id = http_request.headers.get("x-session-id")
     if not session_id:
         session_id = session_manager.create_session()
     
-    response = await session_manager.handle_request(session_id, request)
-    return response
+    response.headers["X-Session-Id"] = session_id
+    
+    result = await session_manager.handle_request(session_id, body)
+    return result
 
 
 @app.get("/health")
