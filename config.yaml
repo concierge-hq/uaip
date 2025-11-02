@@ -13,4 +13,8 @@ services:
   stock_exchange:
     url: "http://localhost:8082/execute"
     description: "Stock trading workflow with browse/transact/portfolio stages"
+  
+  debugging:
+    url: "http://localhost:8082/execute"
+    description: "Data debugging workflow for debugging anything related to Spark applications. Use this for spark app debugging"
 

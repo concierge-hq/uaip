@@ -97,13 +97,18 @@ class task:
         def simple_task(state, x: int) -> dict:
             return {"result": x}
         
+        @task(description="Custom task description")
+        def described_task(state, x: int) -> dict:
+            return {"result": x}
+        
         @task(output=MyConstruct)
         def typed_task(state, x: int) -> dict:
             return {"field": "value"}
     """
     
-    def __init__(self, output: Optional[Type] = None):
-        """Initialize task decorator with optional output construct"""
+    def __init__(self, description: Optional[str] = None, output: Optional[Type] = None):
+        """Initialize task decorator with optional description and output construct"""
+        self.description = description
         self.output = output
     
     def __call__(self, func: Callable) -> Callable:
@@ -150,7 +155,7 @@ class task:
         
         task_obj = Task(
             name=func.__name__,
-            description=inspect.getdoc(func) or "",
+            description=self.description or inspect.getdoc(func) or "",
             func=func,
             output=self.output
         )
