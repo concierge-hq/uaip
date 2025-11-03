@@ -19,12 +19,18 @@ Developers define workflows with explicit rules and prerequisites. You control a
 
 <br>
 <p align="center">
-  <img src="assets/Concierge WF.png" alt="Concierge Workflow" width="100%"/>
-  <br/>
-  <img src="assets/Concierge Stats.png" alt="Concierge Stats" width="100%"/>
-  
+  <img src="assets/concierge_example.svg" alt="Concierge Example" width="100%"/>
 </p>
 <br>
+
+<br>
+<p align="center">
+  <img src="assets/Concierge WF.png" alt="Concierge Workflow" width="100%"/>
+  <br/>  
+</p>
+<br>
+
+
 
 ### **Tasks**
 Tasks are the smallest granularity of callable business logic. Several tasks can be defined within 1 stage. Ensuring these tasks are avialable or callable at the stage. 
@@ -178,11 +184,6 @@ class CheckoutStage:
 - **Travel Booking**: Flights and hotels with multi-stage search and booking
 - **Payment**: Payment workflows with verification and compliance checks
 
-<br>
-<p align="center">
-  <img src="assets/concierge_example.svg" alt="Concierge Example" width="100%"/>
-</p>
-<br>
 
 ---
 
