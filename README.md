@@ -23,6 +23,7 @@ Developers define workflows with explicit rules and prerequisites. You control a
 </p>
 <br>
 
+**Dashboard**
 <br>
 <p align="center">
   <img src="assets/Concierge WF.png" alt="Concierge Workflow" width="100%"/>
