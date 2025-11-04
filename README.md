@@ -58,12 +58,9 @@ class ProductStage:
     def add_to_wishlist(self, state: State, product_id: str) -> dict:
         """Saves item for later"""
         
-    @task(description="View product details")
-    def view_details(self, state: State, product_id: str) -> dict:
-        """Shows full product information"""
 ```
 
-### 📦 **State**
+### **State**
 A state is a global context that is maintained by Concierge, parts of which can get propagated to other stages as the agent transitions and navigates through stages. 
 ```python
 # State persists across stages and tasks
@@ -76,7 +73,7 @@ items = state.get("cart.items", [])
 user_email = state.get("user.email")
 ```
 
-### 🔧 **Workflow**
+### **Workflow**
 A workflow is a logic grouping of several stages, you can define graphs of stages which represent legal moves to other stages within workflow.
 ```python
 @workflow(name="shopping")
