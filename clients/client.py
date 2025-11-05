@@ -28,7 +28,7 @@ Example:
     }
 }
 
-NEVER mix protocols! Outer = your signals. Inner = service's format.
+NEVER mix protocols! Outer = your signals; Inner = service's format.
 
 Available signals (respond ONLY in JSON):
 

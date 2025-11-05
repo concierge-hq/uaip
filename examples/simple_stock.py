@@ -1,6 +1,6 @@
 """
 Simple stock exchange example - demonstrates Concierge basics.
-Focus is on showing the framework, not real stock logic.
+Focus is on demonstrating the framework, not real stock logic.
 
 """
 import asyncio
