@@ -11,7 +11,20 @@
 **Expose your service to Agents**
 <br>
 
-Concierge is a declerative framework that allows LLMs to interact with your applications, and navigate through complex service heirarchies. Concierge provides a rich context to guide agents towards domain specific goals. (Example: Agents browsing, selecting, transcating for online shopping interface).
+Concierge is a declerative framework that allows LLMs to interact with your applications, and navigate through complex service heirarchies. With Concierge, you can built applications for AI/LLM use exposed over the web to guide agents towards domain specific goals. (Example: Agents browsing, selecting, transcating for online shopping interface).
+
+## Quick Start
+
+```bash
+# Install dependencies
+pip install -e .
+
+# Run server
+./scripts/run-server.sh
+
+# Test with example workflow (in another terminal)
+python examples/ecommerce/workflow.py
+```
 
 ## Core Concepts
 
@@ -19,10 +32,7 @@ Developers define workflows with explicit rules and prerequisites. You control a
 
 <br>
 <p align="center">
-  <img src="assets/Concierge WF.png" alt="Concierge Workflow" width="100%"/>
-  <br/>
-  <img src="assets/Concierge Stats.png" alt="Concierge Stats" width="100%"/>
-  
+  <img src="assets/concierge_example.svg" alt="Concierge Example" width="100%"/>
 </p>
 <br>
 
@@ -51,12 +61,9 @@ class ProductStage:
     def add_to_wishlist(self, state: State, product_id: str) -> dict:
         """Saves item for later"""
         
-    @task(description="View product details")
-    def view_details(self, state: State, product_id: str) -> dict:
-        """Shows full product information"""
 ```
 
-### 📦 **State**
+### **State**
 A state is a global context that is maintained by Concierge, parts of which can get propagated to other stages as the agent transitions and navigates through stages. 
 ```python
 # State persists across stages and tasks
@@ -69,7 +76,7 @@ items = state.get("cart.items", [])
 user_email = state.get("user.email")
 ```
 
-### 🔧 **Workflow**
+### **Workflow**
 A workflow is a logic grouping of several stages, you can define graphs of stages which represent legal moves to other stages within workflow.
 ```python
 @workflow(name="shopping")
@@ -89,18 +96,14 @@ class ShoppingWorkflow:
     }
 ```
 
-## Quick Start
+**Dashboard**
+<br>
+<p align="center">
+  <img src="assets/Concierge WF.png" alt="Concierge Workflow" width="100%"/>
+  <br/>  
+</p>
+<br>
 
-```bash
-# Install dependencies
-pip install -e .
-
-# Run server
-./scripts/run-server.sh
-
-# Test with example workflow (in another terminal)
-python examples/ecommerce/workflow.py
-```
 
 ## Examples
 
@@ -178,11 +181,6 @@ class CheckoutStage:
 - **Travel Booking**: Flights and hotels with multi-stage search and booking
 - **Payment**: Payment workflows with verification and compliance checks
 
-<br>
-<p align="center">
-  <img src="assets/concierge_example.svg" alt="Concierge Example" width="100%"/>
-</p>
-<br>
 
 ---
 
