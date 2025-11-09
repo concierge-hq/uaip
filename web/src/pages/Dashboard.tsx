@@ -11,6 +11,16 @@ import { AppHeader } from '../components/AppHeader'
 export function Dashboard() {
   const { data: workflows, isLoading: workflowsLoading, error: workflowsError } = useWorkflows()
   const { data: stats, isLoading: statsLoading } = useStats()
+  
+  const displayName = (name: string) => {
+    const map: Record<string, string> = {
+      ecommerce_platform_demo: 'E‑commerce Shopping Workflow',
+      stock_exchange_platform: 'Stock Exchange',
+      stock_exchange: 'Uber Cab Ordering Workflow',
+      zillow: 'Real Estate Investment Platform',
+    }
+    return map[name] || name
+  }
 
   if (workflowsError) {
     return (
@@ -139,27 +149,38 @@ export function Dashboard() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              {mainStats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-all duration-200"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`w-10 h-10 rounded-lg bg-${stat.color}-50 flex items-center justify-center`}>
-                      <stat.icon className={`w-5 h-5 text-${stat.color}-600`} />
-                    </div>
-                    {stat.change && (
-                      <div className="text-xs text-gray-500">
-                        {stat.change}
+              {mainStats.map((stat) => {
+                const colorClasses = {
+                  indigo: 'bg-indigo-50 text-indigo-600',
+                  purple: 'bg-purple-50 text-purple-600',
+                  green: 'bg-green-50 text-green-600',
+                  blue: 'bg-blue-50 text-blue-600',
+                }
+                const colors = colorClasses[stat.color as keyof typeof colorClasses] || 'bg-gray-50 text-gray-600'
+                const [bgColor, textColor] = colors.split(' ')
+                
+                return (
+                  <div
+                    key={stat.label}
+                    className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-all duration-200"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className={`w-10 h-10 rounded-lg ${bgColor} flex items-center justify-center`}>
+                        <stat.icon className={`w-5 h-5 ${textColor}`} />
                       </div>
-                    )}
+                      {stat.change && (
+                        <div className="text-xs text-gray-500">
+                          {stat.change}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900 mb-1">
+                      {stat.value}
+                    </div>
+                    <div className="text-sm text-gray-600">{stat.label}</div>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900 mb-1">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-gray-600">{stat.label}</div>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             {/* Active Workflows */}
@@ -183,7 +204,7 @@ export function Dashboard() {
                     </div>
 
                     <h4 className="font-semibold text-sm text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors">
-                      {workflow.description || workflow.name}
+                      {displayName(workflow.name)}
                     </h4>
 
                     <div className="flex items-center gap-3 text-xs text-gray-500">

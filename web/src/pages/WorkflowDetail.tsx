@@ -13,6 +13,16 @@ export function WorkflowDetail() {
   const { data, isLoading, error } = useWorkflow(workflowName || '')
   const [selectedStage, setSelectedStage] = useState<string | null>(null)
   const [selectedTask, setSelectedTask] = useState<string | null>(null)
+  
+  const displayName = (name: string) => {
+    const map: Record<string, string> = {
+      ecommerce_platform_demo: 'E‑commerce Shopping Workflow',
+      stock_exchange_platform: 'Stock Exchange',
+      stock_exchange: 'Uber Cab Ordering Workflow',
+      zillow: 'Real Estate Investment Platform',
+    }
+    return map[name] || name
+  }
 
   if (isLoading) {
     return (
@@ -62,7 +72,7 @@ export function WorkflowDetail() {
               <span>Dashboard</span>
             </Link>
             <ChevronRight className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-900 font-medium">{workflow.description || workflow.name}</span>
+            <span className="text-gray-900 font-medium">{displayName(workflow.name)}</span>
             <span className="ml-auto text-xs text-gray-500">
               {Object.keys(workflow.stages).length} stages
             </span>
