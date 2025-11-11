@@ -1,3 +1,6 @@
+"""
+E-commerce shopping workflow with discovery, product browsing, cart, and checkout stages.
+"""
 from concierge.core import workflow, stage, task, State
 
 
