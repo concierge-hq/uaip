@@ -13,17 +13,23 @@
 
 Concierge is a declerative framework that allows LLMs to interact with your applications, and navigate through complex service heirarchies. With Concierge, you can built applications for AI/LLM use exposed over the web to guide agents towards domain specific goals. (Example: Agents browsing, selecting, transcating for online shopping interface).
 
+<h2 id="updates">🔄 Updates</h2>
+
+ - **Nov 16, 2024**: Concierge x <a href="https://www.useblock.tech/">Block</a> unite. Concierge now powers applications to allow you to chat with an agent to book salon appointments.
+ - **Nov 10, 2024**: Concierge x <a href="https://topfunnel.io/">Funnel</a> unite. Concierge powers your AI Staff Member That Never Sleeps.
+ - **Nov 5, 2024**: Concierge x <a href="https://usearistotle.com/">Aristotle</a>. Concierge now powers Aristotle to chat with your agent to spring up high stake deployments reliably.
+
 ## Quick Start
 
 ```bash
-# Install dependencies
-pip install -e .
+# 1. Install Concierge
+pip install concierge_awi
 
-# Run server
-./scripts/run-server.sh
+# 2. Start the AWI
+concierge serve --config your_workflow.yaml
 
-# Test with example workflow (in another terminal)
-python examples/ecommerce/workflow.py
+# 3. Chat with your service!
+concierge chat --config your_workflow.yaml --api-base https://api.openai.com/v1 --api-key $OPENAI_API_KEY
 ```
 
 ## Core Concepts
