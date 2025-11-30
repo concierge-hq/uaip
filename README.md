@@ -1,17 +1,45 @@
 <br>
 <p align="center">
-  <img src="assets/logo.svg" alt="Concierge Logo" width="2000"/>
+  <img src="assets/logo.svg" alt="Concierge Logo" width="800"/>
 </p>
+
+<p align="center">
+  <a href="https://theagenticweb.org/" target="_blank">
+    <img src="https://img.shields.io/badge/Website-theagenticweb.org-8B5CF6?style=flat&logo=safari&logoColor=white&labelColor=000000" alt="Website"/>
+  </a>
+  &nbsp;
+  <a href="https://discord.gg/bfT3VkhF" target="_blank">
+    <img src="https://img.shields.io/badge/Discord-Join_Community-5865F2?style=flat&logo=discord&logoColor=white&labelColor=000000" alt="Discord"/>
+  </a>
+  &nbsp;
+  <a href="https://calendly.com/arnavbalyan1/new-meeting" target="_blank">
+    <img src="https://img.shields.io/badge/Book_Demo-Calendly-00A2FF?style=flat&logo=calendly&logoColor=white&labelColor=000000" alt="Book Demo"/>
+  </a>
+  &nbsp;
+  <a href="https://calendar.google.com/calendar/u/0?cid=MWRiNjA2YjEzODU5MjM4MGE0ZWU1ODJkZTc1ZDhhOTJkNDdhNTg5ODUzNDU5OWM1MWM0YkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t" target="_blank">
+    <img src="https://img.shields.io/badge/Community_Sync-Calendar-34A853?style=flat&logo=googlecalendar&logoColor=white&labelColor=000000" alt="Community Sync"/>
+  </a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/build-passing-brightgreen?style=flat&labelColor=000000" alt="Build Status"/>
+  &nbsp;
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=flat&labelColor=000000" alt="License"/>
+  &nbsp;
+  <img src="https://img.shields.io/badge/python-3.10+-yellow?style=flat&logo=python&logoColor=white&labelColor=000000" alt="Python"/>
+</p>
+
 <br>
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]() [![License: MIT](https://img.shields.io/badge/License-MIT-blue)]() [![Python 3.10+](https://img.shields.io/badge/python-3.10+-lightgrey)]()
+<h1 align="center">Concierge Agentic Web Interfaces</h1>
 
-# Concierge Agentic Web Interfaces
+<p align="center"><b>Expose your service to Agents</b></p>
 
-**Expose your service to Agents**
+<p align="center">
+Concierge is a declarative framework that allows LLMs to interact with your applications and navigate through complex service hierarchies. Build applications for AI/LLM use exposed over the web to guide agents towards domain specific goals.
+</p>
+
 <br>
-
-Concierge is a declerative framework that allows LLMs to interact with your applications, and navigate through complex service heirarchies. With Concierge, you can built applications for AI/LLM use exposed over the web to guide agents towards domain specific goals. (Example: Agents browsing, selecting, transcating for online shopping interface).
 
 <h2 id="updates">🚀 Updates</h2>
 
