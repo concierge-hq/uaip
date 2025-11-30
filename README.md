@@ -31,21 +31,21 @@
 
 <br>
 
-<h1 align="center">Concierge Agentic Web Interfaces</h1>
+<h1 align="left">Concierge Agentic Web Interfaces</h1>
 
-<p align="center"><b>Expose your service to Agents</b></p>
+<p align="left"><b>Expose your service to Agents</b></p>
 
-<p align="center">
+<p align="left">
 Concierge is a declarative framework that allows LLMs to interact with your applications and navigate through complex service hierarchies. Build applications for AI/LLM use exposed over the web to guide agents towards domain specific goals.
 </p>
 
-<br>
 
-<h2 id="updates">🚀 Updates</h2>
+<h2 id="updates"> Updates</h2>
 
- - **Nov, 2025**: Concierge x <a href="https://www.useblock.tech/">Block</a> unite. Concierge now powers conversational booking agents for beauty and wellness appointments across platforms.
- - **Nov, 2025**: Concierge x <a href="https://topfunnel.io/">Funnel</a> unite. Concierge powers your AI Staff Member That Never Sleeps.
- - **Nov, 2025**: Concierge x <a href="https://usearistotle.com/">Aristotle</a>. Concierge now powers Aristotle's conversational AI for reliable, high-stakes production deployments.
+ - **Nov, 2025**:
+   - Concierge x <a href="https://www.useblock.tech/">Block</a> unite. Concierge now powers conversational booking agents for beauty and wellness appointments across platforms.
+   - Concierge x <a href="https://topfunnel.io/">Funnel</a> unite. Concierge powers your AI Staff Member That Never Sleeps.
+   - Concierge x <a href="https://usearistotle.com/">Aristotle</a>. Concierge now powers Aristotle's conversational AI for reliable, high-stakes production deployments.
 
 ## Quick Start
 
