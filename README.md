@@ -37,6 +37,13 @@ Concierge is a declarative framework that allows LLMs to interact with your appl
 </p>
 
 
+<p align="center">
+  <img src="assets/token_usage.png" alt="Token Usage" width="48%"/>
+  <img src="assets/error_rate.png" alt="Error Rate" width="48%"/>
+</p>
+
+These benchmark graphs demonstrate Concierge AIP’s efficiency and stability across increasing difficulty levels.
+
 <h2 id="updates"> Updates</h2>
 
  - **Nov, 2025**:
