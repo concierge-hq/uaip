@@ -42,7 +42,7 @@ Concierge is a declarative framework that allows LLMs to interact with your appl
   <img src="assets/error_rate.png" alt="Error Rate" width="48%"/>
 </p>
 
-Concierge’s superior token efficiency across increasing difficulty levels on e-commerce/vendor bench.
+Concierge token efficiency across increasing difficulty levels on e-commerce/vendor bench.
 
 <h2 id="updates"> Updates</h2>
 
