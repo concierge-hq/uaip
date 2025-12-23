@@ -1,32 +1,32 @@
 import { useQuery } from '@tanstack/react-query'
+import { useAuth } from '@clerk/clerk-react'
 import { API_BASE_URL } from '../config'
 
-interface WorkflowSummary {
-  name: string
+export interface Workflow {
+  name: string 
+  display_name: string
   description: string
-  stages: string[]
-  initial_stage: string
-}
-
-interface WorkflowsResponse {
-  workflows: WorkflowSummary[]
-}
-
-async function fetchWorkflows(): Promise<WorkflowSummary[]> {
-  const response = await fetch(`${API_BASE_URL}/api/workflows`)
-  if (!response.ok) throw new Error('Failed to fetch workflows')
-  const data: WorkflowsResponse = await response.json()
-  return data.workflows
+  worker_url: string
 }
 
 export function useWorkflows() {
-  return useQuery({
-    queryKey: ['workflows'],
-    queryFn: fetchWorkflows,
+  const { getToken, userId, isSignedIn } = useAuth()
+  
+  return useQuery<Workflow[]>({
+    queryKey: ['workflows', userId],
+    queryFn: async () => {
+      const token = isSignedIn ? await getToken() : null
+      const headers: Record<string, string> = {}
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      const response = await fetch(`${API_BASE_URL}/api/workflows`, { headers })
+      if (!response.ok) throw new Error('Failed to fetch workflows')
+      const data = await response.json()
+      return data.workflows || []
+    },
+    staleTime: 1000 * 60 * 5,
   })
 }
-
-
-
 
 
