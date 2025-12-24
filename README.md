@@ -60,7 +60,7 @@ openmcp deploy
 ```
 
 <details>
-<summary>📝 Build Instant ChatGPT Apps</summary>
+<summary><b> Example: Interactive Applications rendering in ChatGPT</b></summary>
 
 ```python
 from openmcp import OpenMCP
@@ -88,7 +88,7 @@ openmcp deploy
 ```
 
 <details>
-<summary>📝 Example: Wrap FastMCP</summary>
+<summary><b>📝 Example: Convert your existing MCPs to OpenMCP </b></summary>
 
 ```python
 from mcp.server.fastmcp import FastMCP
@@ -118,7 +118,7 @@ openmcp deploy
 ```
 
 <details>
-<summary>📝 Example: Add Search Backend</summary>
+<summary><b>Example: Enable OpenMCP's Search Backend</b></summary>
 
 ```python
 from openmcp import OpenMCP, Config, ProviderType
