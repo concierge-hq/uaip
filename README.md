@@ -104,7 +104,7 @@ def get_user(user_id: int):
 ```
 </details>
 
-### 3. Advanced Applications
+### 3. Advanced Multistage Workflows
 
 ```bash
 # Install MCP Core with all features
