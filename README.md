@@ -105,13 +105,13 @@ def get_user(user_id: int):
 ```
 </details>
 
-### 3. Advanced Multistage Workflows
+### 3. Concierge Multistage Workflows
 
 ```bash
 # Install MCP Core with all features
 pip install openmcp-sdk[all]
 
-# Initialize advanced project
+# Initialize concierge project
 openmcp init
 
 # Deploy with enhanced capabilities
