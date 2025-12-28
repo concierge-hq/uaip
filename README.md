@@ -46,7 +46,7 @@ Concierge token efficiency across increasing difficulty levels on e-commerce/ven
 
 ## Quick Start
 
-### 1. ChatGPT Applications
+### 1. ChatGPT Apps
 
 ```bash
 # Install MCP Core
