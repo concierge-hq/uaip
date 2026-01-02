@@ -67,7 +67,7 @@ Concierge token efficiency across increasing difficulty levels of tasks.
 ### 1. ChatGPT Apps
 
 ```bash
-# Install MCP Core
+# Install MCP SDK
 pip install openmcp-sdk
 
 # Initialize with ChatGPT Apps support
