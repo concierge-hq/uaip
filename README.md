@@ -28,7 +28,7 @@
   <img src="https://img.shields.io/badge/python-3.10+-yellow?style=flat&logo=python&logoColor=white&labelColor=000000" alt="Python"/>
 </p>
 
-<h1 align="left">Concierge Agentic Workflows</h1>
+<h1 align="left">Concierge AI</h1>
 
 <p align="left"><b>Expose your service to Agents</b></p>
 
