@@ -37,13 +37,6 @@ UAIP defines how autonomous agents interact with applications through explicit s
 
 <p align="center"><i>UAIP token efficiency across benchmarks</i></p>
 
-<p align="center">
-  <img
-    src="https://github.com/user-attachments/assets/f3e583a3-0350-407c-aa96-bce280fc6db8"
-    width="100%"
-  />
-</p>
-
 
 ## Quick Start
 
