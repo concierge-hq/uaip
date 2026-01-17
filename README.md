@@ -52,7 +52,7 @@ cd my-store
 python main.py
 ```
 
-This starts a UAIP server at `http://localhost:8000` that agents can interact with via `/initialize` and `/execute`.
+This starts a UAIP server at specified port that agents can interact with via `/initialize` and `/execute`.
 
 ## Universal Agent Interactive Protocol
 
