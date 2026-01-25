@@ -1,4 +1,10 @@
-<h1 align="center">Concierge</h1>
+<p align="center">
+  <img
+    src="https://raw.githubusercontent.com/concierge-hq/concierge/main/assets/logo.svg"
+    alt="Concierge"
+  />
+</p>
+
 
 <p align="center">
   <a href="https://github.com/concierge-hq/UAIP" target="_blank">
@@ -25,7 +31,7 @@
   <img src="https://img.shields.io/badge/python-3.9+-yellow?style=flat&logo=python&logoColor=white&labelColor=000000" alt="Python"/>
 </p>
 
-<p align="center"><b>An open protocol for interoperability between autonomous agents and application services.</b></p>
+<p align="center"><b>An open framework for interoperability between autonomous agents and application services.</b></p>
 
 UAIP defines how autonomous agents interact with applications through explicit stages, workflows, and tasks. It guarantees invocation order and reliable execution, replacing ad-hoc prompting with verifiable contracts. UAIP is 78% more token efficient than existing protocols, eliminating context overflow and semantic loss.
 
