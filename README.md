@@ -53,8 +53,6 @@ cd my-store                  # Enter the project
 python main.py               # Start the server
 ```
 
-Scaffolds a Concierge app with 3 stages with a workflow and starts the local Concierge app.
-
 **Or convert an existing MCP server:**
 
 ```python
@@ -68,7 +66,6 @@ app = Concierge("my-server")
 ```
 
 Your `@app.tool()` decorators are unchanged. But you get superpowers.
-
 
 ## Why Concierge?
 
