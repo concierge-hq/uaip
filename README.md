@@ -71,7 +71,7 @@ Your `@app.tool()` decorators are unchanged. But you get superpowers.
 
 ## Why Concierge?
 
-When you expose tools as a flat list, agents can invoke them in any order, sessions bleed into each other, and context windows fill up before the real work begins.
+When you expose tools as a flat list, agents can invoke them in any order, semantic loss creeps in as tool count grows, and context windows fill up before the real work begins.
 
 Concierge provides several primitives that you can annotate your tools to convert them into structured workflows that an agent can reliably navigate and interact with:
 
@@ -150,15 +150,10 @@ from concierge import Concierge
 
 app = Concierge("shopping")
 
-# ═══════════════════════════════════════════════════════════
-# Stage: browse — Agent can search and discover products
-# ═══════════════════════════════════════════════════════════
-
 @app.tool()
 def search_products(query: str) -> dict:
     """Search for products by keyword."""
     return {"products": [
-        {"id": "p1", "name": "Laptop", "price": 999},
         {"id": "p2", "name": "Mouse", "price": 29},
     ]}
 
@@ -166,10 +161,6 @@ def search_products(query: str) -> dict:
 def view_product(product_id: str) -> dict:
     """View detailed product information."""
     return {"id": product_id, "name": "Laptop", "price": 999, "stock": 50}
-
-# ═══════════════════════════════════════════════════════════
-# Stage: cart — Manage shopping cart
-# ═══════════════════════════════════════════════════════════
 
 @app.tool()
 def add_to_cart(product_id: str, quantity: int = 1) -> dict:
@@ -181,24 +172,13 @@ def add_to_cart(product_id: str, quantity: int = 1) -> dict:
 
 @app.tool()
 def view_cart() -> dict:
-    """View current cart contents."""
     return {"cart": app.get_state("cart", [])}
-
-# ═══════════════════════════════════════════════════════════
-# Stage: checkout — Complete the purchase
-# ═══════════════════════════════════════════════════════════
 
 @app.tool()
 def checkout(payment_method: str) -> dict:
-    """Process payment and complete order."""
     cart = app.get_state("cart", [])
     order_id = f"ORD-{len(cart) * 1000}"
-    app.set_state("cart", [])
     return {"order_id": order_id, "status": "confirmed"}
-
-# ═══════════════════════════════════════════════════════════
-# Define stages, and legal transitions
-# ═══════════════════════════════════════════════════════════
 
 app.stages = {
     "browse": ["search_products", "view_product"],
