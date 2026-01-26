@@ -3,33 +3,32 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "uaip"
-version = "0.1.2"
-description = "Universal Agent Interactive Protocol - Python SDK with a declarative framework to build Agentic AI Services"
-readme = "README.md"
-license = {file = "LICENSE"}
-requires-python = ">=3.9"
+name = "concierge-sdk"
+version = "0.3.0"
+description = "Deploy production grade MCP apps in seconds"
+requires-python = ">=3.10"
 dependencies = [
-    "fastapi>=0.109.0",
-    "uvicorn>=0.27.0",
-    "pydantic>=2.0.0",
-    "pyyaml>=6.0.0",
-    "click>=8.0.0",
+    "mcp>=1.0.0",
+    "httpx>=0.25.0",
+]
+
+[project.optional-dependencies]
+all = [
+    "sentence-transformers>=2.0.0",
+    "numpy>=1.24.0",
 ]
 
 [project.scripts]
-uaip = "uaip.cli:cli"
-
-[project.urls]
-Homepage = "https://github.com/concierge-hq/UAIP"
-Repository = "https://github.com/concierge-hq/UAIP"
+concierge = "concierge_cli:main"
 
 [tool.setuptools]
-package-dir = {"" = "src"}
-
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["uaip*"]
+packages = ["concierge", "concierge.backends", "concierge.core", "concierge_cli"]
+package-dir = {"concierge" = ".", "concierge_cli" = "./concierge_cli"}
+include-package-data = true
 
 [tool.setuptools.package-data]
-"uaip" = ["templates/mini_store/*"]
+concierge = ["templates/**/*.py", "templates/**/*.html", "templates/**/*.txt", "templates/**/*.md", "templates/**/*.json"]
+concierge_cli = ["**/*.py"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["node_modules/**", "*.pyc", "__pycache__/**", "docs/**", "test_*.py", "example.py"]

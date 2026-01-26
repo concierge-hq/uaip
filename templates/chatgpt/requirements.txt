@@ -1,0 +1,3 @@
+concierge-sdk
+uvicorn
+starlette

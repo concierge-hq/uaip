@@ -1,0 +1,25 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Concierge",
+  "colors": {
+    "primary": "#8B5CF6",
+    "light": "#A78BFA",
+    "dark": "#7C3AED"
+  },
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/concierge-hq/concierge-sdk"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Documentation",
+      "pages": ["introduction"]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/concierge-hq/concierge-sdk",
+    "discord": "https://discord.gg/bfT3VkhF"
+  }
+}
