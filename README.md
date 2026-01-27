@@ -2,7 +2,7 @@
   <img
     src="https://raw.githubusercontent.com/concierge-hq/concierge/main/assets/logo.svg"
     alt="Concierge"
-    width="85%"
+    width="90%"
   />
 </p>
 
