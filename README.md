@@ -2,9 +2,9 @@
   <img
     src="https://raw.githubusercontent.com/concierge-hq/concierge/main/assets/logo.svg"
     alt="Concierge"
+    width="85%"
   />
 </p>
-
 
 <p align="center">
   <a href="https://github.com/concierge-hq/concierge-sdk" target="_blank">
@@ -239,17 +239,3 @@ Interested in contributing or building with Concierge? [Reach out](mailto:arnavb
 ## Contributing
 
 Contributions are welcome. Please open an issue or submit a pull request.
-
-<p align="center">
-  <a href="https://github.com/concierge-hq/concierge-sdk/discussions" target="_blank">
-    <img src="https://img.shields.io/badge/Discussions-Ask_Questions-blue?style=flat&logo=github&logoColor=white&labelColor=000000" alt="Discussions"/>
-  </a>
-  &nbsp;
-  <a href="https://github.com/concierge-hq/concierge-sdk/issues" target="_blank">
-    <img src="https://img.shields.io/badge/Issues-Report_Bugs-red?style=flat&logo=github&logoColor=white&labelColor=000000" alt="Issues"/>
-  </a>
-  &nbsp;
-  <a href="https://discord.gg/bfT3VkhF" target="_blank">
-    <img src="https://img.shields.io/badge/Discord-Chat-5865F2?style=flat&logo=discord&logoColor=white&labelColor=000000" alt="Discord"/>
-  </a>
-</p>
